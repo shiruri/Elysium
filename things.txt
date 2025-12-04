@@ -1,0 +1,124 @@
+
+print 10 + 10
+print "HELLO WORLD"
+print 1 + "MOEW"
+print "MOEW + 1
+print "MOEW" + "MOEW" + "MOEW"
+print 1 + 1 + 1
+
+@test = 5
+@test2 "Moew"
+
+print ""value of test: " @test
+
+print @test2
+
+@test2 = @test
+
+print @test2
+
+@x = 1
+@y = 1
+
+if @x == 1
+then
+print "ITS ONE"
+endif
+
+input "ITS AN INPUT" @input
+
+print @input
+
+
+print "MOEW + 1
+
+print "MOEW" + "MOEW" + "MOEW"
+print 1 + 1 + 1
+
+@test = 5
+@test2 "Moew"
+
+print ""value of test: " @test
+
+print @test2
+
+@test2 = @test
+
+print @test2
+
+@x = 1
+@y = 1
+
+if @x == 1
+then
+print "ITS ONE"
+endif
+
+input "ITS AN INPUT" @input
+
+print @input
+
+multiple concat 
+concat with var 
+concat wth num
+concat with string
+
+if then endif
+ 
+greater than or less than or greater than or equal and less than or equal 
+
+
+functions working
+
+print 10 + 10 
+print "HELLO WORLD"
+
+print 1 + "MOEW"
+print "moew" + 1
+
+print "MOEW" + "MOEW" + "MOEW" + 2
+print 2 + "MOEW" + "MEW"
+
+
+@text = "TEXT"
+@var = 5
+@expr = 30 + 32 + 32
+print @var
+
+@var2 = @var
+@text2 = @text
+@expr2 = @expr
+
+
+print @var2
+print @text2
+print @expr2
+
+@var = "ITSVAR"
+@x = 4
+print @var + "MOEW" + "MOEW" + @var + "THE X IS 4" + " " + @x + " " +"23"
+
+print "Welcome to calculator"
+input "Enter First Number" @firstNum
+input "Enter Second Number" @secondNum
+
+input "Enter Operand" @operand
+
+@plus = "+"
+@minus = "-"
+@division = "/"
+@multiplication = "*"
+
+if @operand == "+" then
+
+@sum = @firstNum + @secondNum
+print @sum
+endif
+
+@one = 2
+@two = 2
+
+@sum = 23 / @one + 32
+print @sum 
+ add loops and logical operators
+<> =< >= !

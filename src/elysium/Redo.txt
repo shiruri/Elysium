@@ -1,0 +1,271 @@
+ @SuppressWarnings("unchecked")
+    private static ArrayList lexer(String fileContent) {
+        //  long start = System.nanoTime();
+        // variables 
+        String tok = ""; // tokens or keywords 
+        int state = 0; // states if found keywords
+        String string = ""; // literal string to be caught
+        String expr = ""; // math expressions
+        String n = ""; //will hold numbers
+        boolean isExpr = false; // will be the flag for storing expresion
+        boolean varStarted = false; // will be the flag for storing var
+
+        String var = ""; // will hold variables
+
+        ArrayList<Character> lists = new ArrayList<>(); // will hold the tokens
+
+        fileContent.trim(); // remove whitespaces
+
+        // add the contents into the list
+        for (int i = 0; i < fileContent.length(); i++) {
+            lists.add(fileContent.charAt(i));
+        }
+        int concatCounter = 0 ;
+        for (int i = 0; i < lists.size(); i++) {
+            char chars = lists.get(i);
+            tok += lists.get(i); // append each chars to tok
+         //   System.out.println(tok);
+            if (" ".equals(tok) || tok.isEmpty()) { // if the tok is empty 
+                if (!var.isEmpty() && varStarted == true && (lists.size() > i + 2) && lists.get(i + 1).equals("=") && !lists.get(i + 1).equals('+')) {
+                    tokens.add("VAR:" + var);
+                    var = "";
+                    varStarted = false;
+                }else if ((i + 3 < lists.size()) && lists.get(i + 3).toString().equals("@") && isExpr == true) {
+                   tokens.add("EXPR:" + expr);
+                    expr = "";
+                    isExpr = false;
+                    tok = "";
+                }
+
+                if (!expr.isBlank() && isExpr == false && state != 1 && (i + 1 > tokens.size()) && tokens.getLast() == "IF") { // if last token is an if append number
+                    tokens.add("NUM:" + expr);
+                    expr = ""; // reset the expr
+                    tok = "";
+                } else if (state == 0) { // if state is zero meaning no found string
+                    tok = ""; // set to empty
+                } else { // if state is not 0 append the blank or space into the string
+                    tok = " "; // reset token
+                }
+
+            } else if (tok.matches("\\R") || tok.equals("<EOF>")) { // if the tok has new  or EOF End of File
+
+                if (!expr.isBlank() && isExpr == true) {  // if expression is not blank and is an expression
+                    tokens.add("EXPR:" + expr); // append to the tokens
+                    expr = ""; // reset the expression
+                    isExpr = false;
+                } else if (!expr.isBlank() && isExpr == false && state != 1) { // if its not empty but not an expression
+                    tokens.add("NUM:" + expr);
+                    expr = ""; // reset the expr
+                    //System.out.println("NUM"); // then its a number
+                } else if (!var.isEmpty()) { // if its the end of the ;ine and var is not empty
+                    tokens.add("VAR:" + var); // add the var to the tokens
+                    var = ""; // reset the var
+                    varStarted = false;
+                }
+                tok = ""; // reset token
+
+            } else if (tok.equals("=") && state == 0) { // if tokens is equals
+                if ((i + 1 < lists.size()) && (lists.get(i + 1).toString() + tok).equals("==") && var.isBlank()) {  // for adding EQEQ if var is blank and the next token is a = again
+                    tokens.add("EQEQ"); // add EQEQ
+                    tok = ""; // reset tok
+                    i++; // skip the next = to avoid double EQEQ
+
+                } else if (!var.isEmpty()) { // if var is not empty
+                    tokens.add("VAR:" + var); // add the var
+                    var = ""; // reset the var 
+                    varStarted = false; // reset the varStarted flag
+                    if ((i + 1 < lists.size()) && !(lists.get(i + 1).toString() + tok).equals("==")) {  // for adding equals variables if the next char is not = again
+                        tokens.add("EQUALS"); // add equals
+                    }
+                    tok = ""; // reset the tok
+
+                } else if ((i > 0) && (lists.get(i - 1).toString() + tok).equals("==")) { // if double equals
+                    tokens.add("EQEQ"); // add EQEQ
+                    tok = ""; // reset the tok
+                    varStarted = false; //set the varSyarted tp fa;se
+                    i++; // skip the next equals
+                
+                } else if ((i + 3 < lists.size()) && (lists.get(i + 3).toString()).equals("@")) { // if double equals
+                    tokens.add("EQEQ"); // add EQEQ
+                    tok = ""; // reset the tok
+                    varStarted = false; //set the varSyarted tp fa;se
+                    i++; // skip the next equals
+                }
+
+            }else if (tok.equals("@") && state == 0) { // if tok equals @ assignment var 
+                varStarted = true; // set the varStarted to true
+                var += tok; // append the  @ to the var
+                tok = ""; // reset tok
+            } else if (varStarted == true) {   // if the varStarted is true
+                if (tok.equals("+") || tok.equals("-") || tok.equals("/") || tok.equals("*")) {
+                    System.out.println(tok + " THE CURRENT TOK");
+                    System.out.println(var + " THE VURRENT CVAR");
+                    System.out.println(expr + " THE VURRENT EXPR");
+                    System.out.println(tokens);
+                    
+                    if (!var.isBlank() && lists.get(i + 1) == ')') {
+                        var += tok;
+                        tok = "";
+                        
+                    }
+                    if (!var.isEmpty() ) { // if its the end of the ;ine and var is not empty
+                        tokens.add("VAR:" + var); // add the var to the tokens
+                        varStarted = false;
+                        var = ""; // reset the var
+                        
+                        
+                        if ((i + 1 < lists.size()) && (tok + lists.get(i + 1).toString()).equals("++") && !tokens.getLast().toString().equals("CONCAT")
+                                || (i + 1 < lists.size()) && (tok + lists.get(i - 1).toString()).equals("++") && !tokens.getLast().toString().equals("CONCAT") // for concat if its currently a plus and next is a quote
+                                || (i + 1 < lists.size()) && (tok + lists.get(i + 1).toString()).equals("++") &&  !tokens.getLast().toString().equals("CONCAT") 
+                                || (i - 1 < lists.size()) && (tok + lists.get(i - 1).toString()).equals("++") &&  !tokens.getLast().toString().equals("CONCAT")  ) { // or next is a @ then concat
+                            tokens.add("CONCAT"); // add concat 
+                            concatCounter++;
+                            isExpr = false;
+                            expr = "";
+                            tok = ""; // reset valuss
+
+                        }
+                    }
+                    expr += tok;
+                    isExpr = true;
+                    varStarted = false;
+                    var = "";
+                } else if (tok.equals("<") || tok.equals(">")) {
+                    if (!var.isEmpty()) { // if its the end of the ;ine and var is not empty
+                        tokens.add("VAR:" + var); // add the var to the tokens
+                        varStarted = false;
+                        var = ""; // reset the var
+                        tok = "";
+                    }
+                }
+                var += tok; // append the vars 
+                tok = ""; // reset the tok
+            } else if (tok.equalsIgnoreCase("print")) { // if it founds a print keyword
+                tokens.add("PRINT"); // append PRINT into the list
+                tok = ""; // reset tok
+
+            } else if (tok.equalsIgnoreCase("IF")) { // if it founds a IF keyword
+                tokens.add("IF"); // append PRINT into the list
+                tok = ""; // reset tok
+
+            } else if (tok.equalsIgnoreCase("THEN")) { // if it founds a THEN keyword
+                tokens.add("THEN"); // append PRINT into the list
+                tok = ""; // reset tok
+            } else if (tok.equalsIgnoreCase("ENDIF")) { // if it founds a THEN keyword
+                tokens.add("ENDIF"); // append PRINT into the list
+                tok = ""; // reset tok
+            } else if (tok.equalsIgnoreCase("input")) { // if tok is input
+                tokens.add("INPUT"); // append the input
+                tok = ""; // reset the tok
+            } else if (Character.isDigit(chars) && state != 1) { // if its a number
+                if (isExpr == true) {
+                    expr += tok; // if already building expression, add to it
+                } else {
+                    expr += tok; // otherwise start new number/expression
+                }
+                tok = ""; // resets token
+            } else if (tok.equals("+") || tok.equals("-") || tok.equals("/") || tok.equals("*") || tok.equals("(") || tok.equals(")") || tok.equals("%")) {
+                int nextIndex = i + 1;
+            
+                if (state == 1) {
+                    // still inside string, treat everything literal
+                    if (tok.equals("\"")) {
+                        tokens.add("STRING:" + string + "\"");
+                        state = 0;
+                        string = "";
+                        tok = "";
+                        continue;
+                    }
+                    string += tok;
+                    tok = "";
+                    continue;
+                }
+                while (nextIndex < lists.size() && lists.get(nextIndex) == ' ') {
+                    nextIndex++;
+                }
+
+                if ((i + 2 < lists.size()) && (tok.equals("+")) && (lists.get(i + 2) == '"' && !tokens.getLast().toString().equals("CONCAT")
+                        || (i + 2 < lists.size()) && lists.get(i + 2).toString().equals("@") && !tokens.getLast().toString().equals("CONCAT"))
+                        || ((lists.size() > i - 2) && lists.get(i - 2) == '"' &&  !tokens.getLast().toString().equals("CONCAT")
+                        || (tokens.size() > i - 2) && tokens.getLast().toString().startsWith("VAR")) && !tokens.getLast().toString().equals("CONCAT")) { // checks the currentToken and if the next is a String
+                    if (!expr.isBlank() && isExpr != true) { // if its not empty and not expression
+                        tokens.add("NUM:" + expr); // add the number 
+                        expr = ""; // reset the expr
+                    }if ((i + 1 < lists.size()) && (tok + lists.get(i + 1).toString()).equals("++") && state != 1 || (i - 1 < lists.size()) &&  (tok + lists.get(i - 1).toString()).equals("++") && state != 1) {
+                        tokens.add("CONCAT"); // add concat 
+                        concatCounter++;
+                        i++;
+                        tok = ""; // reset tok   
+                    }
+                   
+
+
+                } else if ((i + 2 < lists.size()) && lists.get(1 + 2) == '@') {
+                    System.out.println("HELLO");
+                    tokens.add("EXPR:" + expr);
+                    expr = "";
+                    isExpr = false;
+                    tok = "";
+                } else {
+                    System.out.println(lists.get(i + 2));
+                    System.out.println("IS EXPR " + isExpr);
+                    System.out.println("HEERR");
+                    isExpr = true; // set is an expression to true
+                    expr += tok; // append the operator
+                    System.out.println("EXPR" + expr);
+                    tok = ""; // reset token
+                }
+
+            } else if ("\"".equals(tok) || tok.equals(" \"")) { // if tok founds adouble quote
+                if (state == 0) { // if the state is zero
+                    state = 1; // set it to 1 meaning found a String
+                    
+
+                } else if (state == 1 && tok.endsWith(" \"")) {
+                    tokens.add("STRING:" + string + " \""); // append the string into the string
+                    state = 0; // reset values
+                    string = ""; // reset values 
+                    tok = ""; // reset valuss
+// if it ends with space queote
+                } else if (state == 1) { // if the state is 1 
+                    tokens.add("STRING:" + string + "\""); // append the string into the string
+                    state = 0; // reset values
+                    string = ""; // reset values 
+                    tok = ""; // reset valuss
+
+                }
+            } else if (state == 1) { // if state is zero 
+                string += tok; // append the tok into string
+                tok = ""; // reset tok 
+
+            }
+        }
+
+
+String
+NUM
+EXPRESSION
+VAR
+INPUT
+EQUALS
+CONCAT
+EQEQ
+LESSTHAN EQUAL
+GREATERTHAN EQUAL
+
+1. STRING
+2. EXPRESSION mode start
+3. >=
+4. <=
+5. ==
+6. >
+7. <
+8. =
+9. CONCAT
+10. INPUT
+11. NUM
+12. VAR
+13. IDENTIFIER
+
+for(int i < lists.size(); i++) {
+
